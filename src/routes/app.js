@@ -22,10 +22,30 @@ router.put('/user/:id', loginValidation, adminValidation, userController.updateU
 router.delete('/user/:id', loginValidation, adminValidation, userController.deleteUser);
 
 // Product routes
-router.post('/product', loginValidation, adminValidation, upload.single('image'), productController.createProduct);
-router.get('/product', productController.getAllProducts);
-router.get('/product/:id', loginValidation, productController.getProductById);
-router.put('/product/:id', loginValidation, adminValidation, upload.single('image'), productController.updateProduct);
+router.post(
+  "/product",
+  loginValidation,
+  adminValidation,
+  upload.single("image"),
+  async (req, res, next) => {
+    req.body.image = await productController.uploadImageToSupabase(req.file);
+    next();
+  },
+  productController.createProduct
+);
+router.get("/product", productController.getAllProducts);
+router.get("/product/:id", loginValidation, productController.getProductById);
+router.put(
+  "/product/:id",
+  loginValidation,
+  adminValidation,
+  upload.single("image"),
+  async (req, res, next) => {
+    req.body.image = await productController.uploadImageToSupabase(req.file);
+    next();
+  },
+  productController.updateProduct
+);
 router.delete('/product/:id', loginValidation, adminValidation, productController.deleteProduct);
 
 // category routes
