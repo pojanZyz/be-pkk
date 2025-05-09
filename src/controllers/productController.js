@@ -92,7 +92,7 @@ const createProduct = async (req, res) => {
       price,
       description,
       stock,
-      imageUrl,
+      image: imageUrl,
       CategoryId: categoryId,
     });
 

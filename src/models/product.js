@@ -7,7 +7,7 @@ import { DataTypes } from 'sequelize';
  */
 
 export default (sequelize) => {
-  return sequelize.define('Product', {
+  return sequelize.define("Product", {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -23,7 +23,7 @@ export default (sequelize) => {
     description: {
       type: DataTypes.TEXT,
     },
-    imageUrl: {
+    image: {
       type: DataTypes.STRING,
     },
   });
