@@ -9,6 +9,7 @@ import orderController from "../controllers/orderController.js";
 import orderItemsController from "../controllers/orderItemsController.js";
 import cartController from "../controllers/cartController.js";
 import cartItemsController from "../controllers/cartItemsController.js";
+import { getHistoryByUser } from "../controllers/historyController.js";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -122,4 +123,6 @@ router.delete(
   cartItemsController.deleteCartItem
 );
 
+// History routes
+router.get("/history/:userId", loginValidation, getHistoryByUser);
 export default router;
