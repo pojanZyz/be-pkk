@@ -30,9 +30,25 @@ const getCartByUserId = async (req, res) => {
 // Add item to cart
 const addItemToCart = async (req, res) => {
   try {
-    const { cartId, productId, quantity } = req.body;
-    const cartItem = await CartItem.create({ cartId, productId, quantity });
-    res.status(201).json({ message: 'Item added to cart successfully', cartItem });
+    const { productId, quantity } = req.body;
+    const userId = req.user.id;
+
+    let cart = await Cart.findOne({ where: { userId } });
+    if (!cart) {
+      cart = await Cart.create({ userId });
+    }
+
+    const existingItem = await CartItem.findOne({
+      where: { cartId: cart.id, productId },
+    });
+    if (existingItem) {
+      existingItem.quantity += quantity;
+      await existingItem.save();
+    } else {
+      await CartItem.create({ cartId: cart.id, productId, quantity });
+    }
+
+    res.status(201).json({ message: "Item added to cart successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
