@@ -23,7 +23,7 @@ const deleteImageFromSupabase = async (imageUrl) => {
   const imagePath = imageUrl.split('/uploads/')[1];
   await supabase.storage.from('uploads').remove([`products/${imagePath}`]);
 };
-
+ 
 // Get all products
 const getAllProducts = async (req, res) => {
   try {
