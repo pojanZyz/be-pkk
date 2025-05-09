@@ -16,14 +16,7 @@ const PORT = process.env.PORT || 4000;
 
 
 app.use(express.json());
-app.use(
-    cors({
-      origin: "*", // Allows requests from all domains
-      methods: "GET, POST, PUT, DELETE, OPTIONS, PATCH", // Allowed methods
-      allowedHeaders: "Content-Type, Authorization, X-Requested-With", // Allowed headers
-      credentials: true, // If you need cookies to be included in requests
-    })
-  );
+app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(helmet());
 app.use(morgan('dev'));
