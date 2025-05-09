@@ -27,10 +27,6 @@ router.post(
   loginValidation,
   adminValidation,
   upload.single("image"),
-  async (req, res, next) => {
-    req.body.image = await productController.uploadImageToSupabase(req.file);
-    next();
-  },
   productController.createProduct
 );
 router.get("/product", productController.getAllProducts);
@@ -40,10 +36,6 @@ router.put(
   loginValidation,
   adminValidation,
   upload.single("image"),
-  async (req, res, next) => {
-    req.body.image = await productController.uploadImageToSupabase(req.file);
-    next();
-  },
   productController.updateProduct
 );
 router.delete('/product/:id', loginValidation, adminValidation, productController.deleteProduct);
