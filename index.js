@@ -50,8 +50,7 @@ app.use(
   );
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(helmet());
-app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: true}));
+app.use(morgan("dev"));
 app.use('/api', router);
 
 // Error handling middleware
