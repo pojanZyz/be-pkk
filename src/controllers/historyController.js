@@ -29,6 +29,4 @@ const getHistoryByUser = async (req, res) => {
   }
 };
 
-export default {
-  getHistoryByUser
-};
+export { getHistoryByUser };
