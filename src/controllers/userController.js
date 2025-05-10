@@ -7,8 +7,6 @@ const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    // const newUser = await User.create({ username, email, password: hashedPassword, role }); jika role kosong default role customer
-    const newUser = await User.create({ username, email, password: hashedPassword });
     if (role) {
       newUser.role = role;
       await newUser.save();
@@ -16,6 +14,7 @@ const register = async (req, res) => {
       newUser.role = 'customer';
       await newUser.save();
     }
+    const newUser = await User.create({ username, email, password: hashedPassword, role }); //jika role kosong default role customer
     res.status(201).json({ message: 'User registered successfully', user: newUser });
   } catch (error) {
     res.status(500).json({ error: error.message });
