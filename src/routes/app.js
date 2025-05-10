@@ -6,9 +6,7 @@ import userController from "../controllers/userController.js";
 import productController from "../controllers/productController.js";
 import categoryController from "../controllers/categoryController.js";
 import orderController from "../controllers/orderController.js";
-import orderItemsController from "../controllers/orderItemsController.js";
 import cartController from "../controllers/cartController.js";
-import cartItemsController from "../controllers/cartItemsController.js";
 import { getHistoryByUser } from "../controllers/historyController.js";
 import multer from "multer";
 
@@ -54,74 +52,11 @@ router.delete(
   categoryController.deleteCategory
 );
 
-// Order routes
-router.post("/order", loginValidation, orderController.createOrder);
-router.get("/order", adminValidation, orderController.getAllOrders);
-router.get("/order/:id", loginValidation, orderController.getOrderById);
-router.put("/order/:id", adminValidation, orderController.updateOrderStatus);
-router.delete("/order/:id", adminValidation, orderController.deleteOrder);
-
-// Order Items routes
-router.post(
-  "/order-item",
-  adminValidation,
-  orderItemsController.createOrderItem
-);
-router.get(
-  "/order-item",
-  adminValidation,
-  orderItemsController.getAllOrderItems
-);
-router.get(
-  "/order-item/:id",
-  adminValidation,
-  orderItemsController.getOrderItemById
-);
-router.put(
-  "/order-item/:id",
-  adminValidation,
-  orderItemsController.updateOrderItem
-);
-router.delete(
-  "/order-item/:id",
-  adminValidation,
-  orderItemsController.deleteOrderItem
-);
-
-// Cart routes
-router.post("/cart", loginValidation, cartController.createCart);
-router.get("/cart/:userId", loginValidation, cartController.getCartByUserId);
-router.post("/cart/item", loginValidation, cartController.addItemToCart);
-router.put(
-  "/cart/item/:itemId",
-  loginValidation,
-  cartController.updateCartItemQuantity
-);
-router.delete(
-  "/cart/item/:itemId",
-  loginValidation,
-  cartController.removeItemFromCart
-);
-router.delete("/cart/:userId", loginValidation, cartController.clearCart);
-
-// Cart Items routes
-router.post("/cart-item", loginValidation, cartItemsController.createCartItem);
-router.get("/cart-item", loginValidation, cartItemsController.getAllCartItems);
-router.get(
-  "/cart-item/:id",
-  loginValidation,
-  cartItemsController.getCartItemById
-);
-router.put(
-  "/cart-item/:id",
-  loginValidation,
-  cartItemsController.updateCartItem
-);
-router.delete(
-  "/cart-item/:id",
-  loginValidation,
-  cartItemsController.deleteCartItem
-);
+// cart routes
+router.get("/cart", loginValidation, cartController.getCartItems);
+router.post("/cart", loginValidation, cartController.addItemToCart);
+router.put("/cart/:id", loginValidation, cartController.updateCartItem);
+router.delete("/cart/:id", loginValidation, cartController.deleteCartItem);
 
 // History routes
 router.get("/history/:userId", loginValidation, getHistoryByUser);

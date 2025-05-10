@@ -1,107 +1,104 @@
 import { Cart, CartItem, Product } from '../models/index.js';
 
-// Create a new cart
-const createCart = async (req, res) => {
+// Get all items in the cart for a specific user
+const getCartItems = async (req, res) => {
   try {
-    const { userId } = req.body;
-    const newCart = await Cart.create({ userId });
-    res.status(201).json({ message: 'Cart created successfully', cart: newCart });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Get cart by user ID
-const getCartByUserId = async (req, res) => {
-  try {
-    const cart = await Cart.findOne({
-      where: { userId: req.params.userId },
-      include: [{ model: CartItem, include: [Product] }],
+    const userId = req.user.id; // Assuming user ID is available in req.user
+    const cartItems = await CartItem.findAll({
+      include: [
+        {
+          model: Product,
+          attributes: ['id', 'name', 'price', 'imageUrl'],
+        },
+        {
+          model: Cart,
+          where: { UserId: userId },
+        },
+      ],
     });
-    if (!cart) {
-      return res.status(404).json({ error: 'Cart not found' });
-    }
-    res.status(200).json(cart);
+    res.status(200).json({ message: 'Cart items retrieved successfully', data: cartItems });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Failed to retrieve cart items', error: error.message });
   }
 };
 
-// Add item to cart
+// Add an item to the cart for a specific user
 const addItemToCart = async (req, res) => {
   try {
+    const userId = req.user.id; // Assuming user ID is available in req.user
     const { productId, quantity } = req.body;
-    const userId = req.user.id;
 
-    let cart = await Cart.findOne({ where: { userId } });
-    if (!cart) {
-      cart = await Cart.create({ userId });
+    // Validate if the product exists
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
 
-    const existingItem = await CartItem.findOne({
-      where: { cartId: cart.id, productId },
+    // Find or create a cart for the user
+    const [cart] = await Cart.findOrCreate({
+      where: { UserId: userId },
     });
-    if (existingItem) {
-      existingItem.quantity += quantity;
-      await existingItem.save();
-    } else {
-      await CartItem.create({ cartId: cart.id, productId, quantity });
-    }
 
-    res.status(201).json({ message: "Item added to cart successfully" });
+    // Add item to the cart
+    const cartItem = await CartItem.create({
+      CartId: cart.id,
+      ProductId: productId,
+      quantity,
+    });
+
+    res.status(201).json({ message: 'Item added to cart successfully', data: cartItem });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ message: 'Failed to add item to cart', error: error.message });
   }
 };
 
-// Update cart item quantity
-const updateCartItemQuantity = async (req, res) => {
+// Update the quantity of an item in the cart for a specific user
+const updateCartItem = async (req, res) => {
   try {
+    const userId = req.user.id; // Assuming user ID is available in req.user
     const { quantity } = req.body;
-    const cartItem = await CartItem.findByPk(req.params.itemId);
+
+    // Find the cart item that belongs to the user's cart
+    const cartItem = await CartItem.findOne({
+      where: { id: req.params.id },
+      include: [
+        {
+          model: Cart,
+          where: { UserId: userId },
+        },
+      ],
+    });
+
     if (!cartItem) {
-      return res.status(404).json({ error: 'Cart item not found' });
+      return res.status(404).json({ message: 'Cart item not found' });
     }
+
+    // Update the quantity of the cart item
     await cartItem.update({ quantity });
-    res.status(200).json({ message: 'Cart item quantity updated successfully', cartItem });
+    res.status(200).json({ message: 'Cart item updated successfully', data: cartItem });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ message: 'Failed to update cart item', error: error.message });
   }
 };
 
-// Remove item from cart
-const removeItemFromCart = async (req, res) => {
+// Remove an item from the cart for a specific user
+const removeCartItem = async (req, res) => {
   try {
-    const cartItem = await CartItem.findByPk(req.params.itemId);
+    const userId = req.user.id; // Assuming user ID is available in req.user
+    const cartItem = await CartItem.findOne({
+      where: { id: req.params.id },
+      include: [{ model: Cart, where: { UserId: userId } }],
+    });
+
     if (!cartItem) {
-      return res.status(404).json({ error: 'Cart item not found' });
+      return res.status(404).json({ message: 'Cart item not found' });
     }
+
     await cartItem.destroy();
     res.status(200).json({ message: 'Cart item removed successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Failed to remove cart item', error: error.message });
   }
 };
 
-// Clear all items in cart
-const clearCart = async (req, res) => {
-  try {
-    const cart = await Cart.findOne({ where: { userId: req.params.userId } });
-    if (!cart) {
-      return res.status(404).json({ error: 'Cart not found' });
-    }
-    await CartItem.destroy({ where: { cartId: cart.id } });
-    res.status(200).json({ message: 'Cart cleared successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export default {
-  createCart,
-  getCartByUserId,
-  addItemToCart,
-  updateCartItemQuantity,
-  removeItemFromCart,
-  clearCart,
-};
+export { getCartItems, addItemToCart, updateCartItem, removeCartItem };
