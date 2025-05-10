@@ -52,6 +52,14 @@ router.delete(
   categoryController.deleteCategory
 );
 
+// Order routes
+router.post("/order", loginValidation, orderController.createOrder);
+router.get("/order", adminValidation, orderController.getAllOrders);
+router.get("/order/:id", loginValidation, orderController.getOrderById);
+router.put("/order/:id/status", adminValidation, orderController.updateOrderStatus);
+router.delete("/order/:id", adminValidation, orderController.deleteOrder);
+router.get("/order/user/:userId", loginValidation, orderController.getOrdersByUser);
+
 // cart routes
 router.get("/cart", loginValidation, cartController.getCartItems);
 router.post("/cart", loginValidation, cartController.addItemToCart);
