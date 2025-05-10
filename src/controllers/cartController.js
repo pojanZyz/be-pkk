@@ -101,4 +101,4 @@ const removeCartItem = async (req, res) => {
   }
 };
 
-export { getCartItems, addItemToCart, updateCartItem, removeCartItem };
+export default { getCartItems, addItemToCart, updateCartItem, removeCartItem };
