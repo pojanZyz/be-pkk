@@ -64,7 +64,7 @@ router.get("/order/user/:userId", loginValidation, orderController.getOrdersByUs
 router.get("/cart", loginValidation, cartController.getCartItems);
 router.post("/cart", loginValidation, cartController.addItemToCart);
 router.put("/cart/:id", loginValidation, cartController.updateCartItem);
-router.delete("/cart/:id", loginValidation, cartController.deleteCartItem);
+router.delete("/cart/:id", loginValidation, cartController.removeCartItem);
 
 // History routes
 router.get("/history/:userId", loginValidation, getHistoryByUser);
