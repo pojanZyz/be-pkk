@@ -1,4 +1,3 @@
-import { use } from 'react';
 import { Order, OrderItem, Product } from '../models/index.js';
 
 const getHistoryByUser = async (req, res) => {
