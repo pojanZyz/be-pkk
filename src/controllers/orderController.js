@@ -21,7 +21,7 @@ export default {
             orderId: order.id,
             productId: item.productId,
             quantity: item.quantity,
-            price: totalPrice,
+            price: product.price, // gunakan harga produk, bukan totalPrice
           });
         })
       );

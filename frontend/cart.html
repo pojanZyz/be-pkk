@@ -202,6 +202,7 @@
 
     // Checkout
     document.getElementById('checkoutBtn').onclick = async function() {
+      // Kirim productId dan quantity sesuai kebutuhan controller backend
       const items = cartData.filter(item => selectedIds.has(item.id)).map(item => ({
         productId: item.Product.id,
         quantity: item.quantity
@@ -212,6 +213,8 @@
         return;
       }
       const token = localStorage.getItem('token');
+      // Debug log
+      console.log('Checkout payload:', { items, totalPrice });
       try {
         const res = await fetch('https://be-pkk-production.up.railway.app/api/order', {
           method: 'POST',
