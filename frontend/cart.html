@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>MIX SHOES (CART)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body { background: #fff; }
+    .cart-header { border: 3px solid #000; margin-bottom: 24px; }
+    .cart-title { font-size: 2rem; font-style: italic; font-weight: bold; text-align: center; }
+    .cart-item { border: 3px solid #000; border-radius: 0; margin-bottom: 24px; padding: 16px; display: flex; align-items: center; gap: 16px; }
+    .cart-img-box { border: 3px solid #000; width: 120px; height: 100px; display: flex; align-items: center; justify-content: center; background: #fafafa; }
+    .cart-img-box img { max-width: 100px; max-height: 80px; object-fit: contain; }
+    .cart-desc { flex: 1; }
+    .cart-price { font-weight: bold; }
+    .qty-box { border: 3px solid #000; display: flex; align-items: center; width: fit-content; }
+    .qty-btn { border: none; background: none; font-size: 1.5rem; width: 32px; height: 32px; }
+    .qty-input { width: 40px; text-align: center; border: none; outline: none; }
+    .cart-footer { border: 3px solid #000; border-radius: 0; position: fixed; left: 0; bottom: 0; width: 100vw; background: #fff; display: flex; align-items: center; padding: 8px 24px; z-index: 100; }
+    .cart-footer .form-check { margin-bottom: 0; }
+    .cart-footer .checkout-btn { margin-left: auto; min-width: 140px; border: 3px solid #000; border-radius: 12px; font-weight: bold; }
+    .cart-footer .summary { flex: 1; display: flex; justify-content: center; align-items: center; gap: 32px; }
+    @media (max-width: 768px) {
+      .cart-item { flex-direction: column; align-items: flex-start; }
+      .cart-footer { flex-direction: column; gap: 8px; }
+      .cart-footer .checkout-btn { margin-left: 0; width: 100%; }
+      .cart-footer .summary { flex-direction: column; gap: 4px; }
+    }
+  </style>
+</head>
+<body style="padding-bottom:90px;">
+  <div class="cart-header p-2">
+    <div class="d-flex align-items-center">
+      <button onclick="window.history.back()" class="btn btn-link fs-3" style="text-decoration:none; color:#000;">&#8592;</button>
+      <div class="flex-grow-1 cart-title">MIX SHOES ( CART )</div>
+    </div>
+  </div>
+  <div class="container" id="cartList"></div>
+  <div class="cart-footer">
+    <div class="form-check me-3">
+      <input class="form-check-input" type="checkbox" id="selectAll">
+      <label class="form-check-label" for="selectAll">Pilih Semua</label>
+    </div>
+    <div class="summary">
+      <span>Jumlah Product <span id="totalProduct" class="fw-bold">0</span></span>
+      <span>Total Harga <span class="fw-bold">Rp. <span id="totalPrice">0</span></span></span>
+    </div>
+    <button class="btn btn-light checkout-btn" id="checkoutBtn">CHECKOUT</button>
+  </div>
+  <script>
+    let cartData = [];
+    let selectedIds = new Set();
+
+    // Helper: Format number to Rupiah
+    function rupiah(n) {
+      return Number(n).toLocaleString('id-ID');
+    }
+
+    // Fetch cart data
+    async function fetchCart() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        Swal.fire('Harus login terlebih dahulu!', '', 'warning').then(() => location.href = 'login.html');
+        return;
+      }
+      const res = await fetch('https://be-pkk-production.up.railway.app/api/cart', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      cartData = data.data || [];
+      renderCart();
+    }
+
+    // Render cart items
+    function renderCart() {
+      const cartList = document.getElementById('cartList');
+      cartList.innerHTML = '';
+      if (cartData.length === 0) {
+        cartList.innerHTML = '<div class="text-center text-muted my-5">Cart kosong.</div>';
+        document.getElementById('totalProduct').innerText = 0;
+        document.getElementById('totalPrice').innerText = 0;
+        return;
+      }
+      cartData.forEach(item => {
+        const checked = selectedIds.has(item.id) ? 'checked' : '';
+        cartList.innerHTML += `
+          <div class="cart-item" data-id="${item.id}">
+            <input type="checkbox" class="form-check-input me-2 cart-check" data-id="${item.id}" ${checked}>
+            <div class="cart-img-box me-2">
+              <img src="${item.Product.image}" alt="${item.Product.name}">
+            </div>
+            <div class="cart-desc">
+              <div class="fw-bold">${item.Product.name}</div>
+              <div class="text-muted" style="font-size:0.95em;">${item.Product.description || '-'}</div>
+            </div>
+            <div class="ms-3">
+              <div class="cart-price mb-2">Rp. ${rupiah(item.Product.price)}</div>
+              <div class="qty-box">
+                <button class="qty-btn qty-minus" data-id="${item.id}">-</button>
+                <input type="number" class="qty-input" min="1" value="${item.quantity}" data-id="${item.id}">
+                <button class="qty-btn qty-plus" data-id="${item.id}">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      attachCartEvents();
+      updateSummary();
+    }
+
+    // Attach events for qty and checkbox
+    function attachCartEvents() {
+      // Checkbox per item
+      document.querySelectorAll('.cart-check').forEach(cb => {
+        cb.onchange = function() {
+          const id = Number(this.getAttribute('data-id'));
+          if (this.checked) selectedIds.add(id);
+          else selectedIds.delete(id);
+          updateSelectAll();
+          updateSummary();
+        };
+      });
+      // Qty minus
+      document.querySelectorAll('.qty-minus').forEach(btn => {
+        btn.onclick = function() {
+          const id = Number(this.getAttribute('data-id'));
+          const input = document.querySelector(`.qty-input[data-id="${id}"]`);
+          let val = Number(input.value);
+          if (val > 1) {
+            input.value = val - 1;
+            updateQty(id, val - 1);
+          }
+        };
+      });
+      // Qty plus
+      document.querySelectorAll('.qty-plus').forEach(btn => {
+        btn.onclick = function() {
+          const id = Number(this.getAttribute('data-id'));
+          const input = document.querySelector(`.qty-input[data-id="${id}"]`);
+          let val = Number(input.value);
+          input.value = val + 1;
+          updateQty(id, val + 1);
+        };
+      });
+      // Qty input manual
+      document.querySelectorAll('.qty-input').forEach(inp => {
+        inp.onchange = function() {
+          let val = Number(this.value);
+          if (val < 1) val = 1;
+          this.value = val;
+          const id = Number(this.getAttribute('data-id'));
+          updateQty(id, val);
+        };
+      });
+    }
+
+    // Update qty to backend
+    async function updateQty(id, qty) {
+      const token = localStorage.getItem('token');
+      await fetch('https://be-pkk-production.up.railway.app/api/cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ id, quantity: qty })
+      });
+      // Update local data
+      const idx = cartData.findIndex(x => x.id === id);
+      if (idx !== -1) cartData[idx].quantity = qty;
+      updateSummary();
+    }
+
+    // Select All
+    document.getElementById('selectAll').onchange = function() {
+      if (this.checked) {
+        cartData.forEach(item => selectedIds.add(item.id));
+      } else {
+        selectedIds.clear();
+      }
+      renderCart();
+      updateSummary();
+    };
+
+    // Update select all checkbox
+    function updateSelectAll() {
+      const allChecked = cartData.length > 0 && cartData.every(item => selectedIds.has(item.id));
+      document.getElementById('selectAll').checked = allChecked;
+    }
+
+    // Update summary
+    function updateSummary() {
+      let totalProduct = 0, totalPrice = 0;
+      cartData.forEach(item => {
+        if (selectedIds.has(item.id)) {
+          totalProduct += item.quantity;
+          totalPrice += item.Product.price * item.quantity;
+        }
+      });
+      document.getElementById('totalProduct').innerText = totalProduct;
+      document.getElementById('totalPrice').innerText = rupiah(totalPrice);
+    }
+
+    // Checkout
+    document.getElementById('checkoutBtn').onclick = async function() {
+      const items = cartData.filter(item => selectedIds.has(item.id)).map(item => ({
+        productId: item.Product.id,
+        quantity: item.quantity
+      }));
+      const totalPrice = cartData.filter(item => selectedIds.has(item.id)).reduce((sum, item) => sum + item.Product.price * item.quantity, 0);
+      if (items.length === 0) {
+        Swal.fire('Pilih produk yang ingin di-checkout!', '', 'warning');
+        return;
+      }
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('https://be-pkk-production.up.railway.app/api/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ items, totalPrice })
+        });
+        if (res.ok) {
+          Swal.fire('Berhasil!', 'Order berhasil dibuat.', 'success').then(() => location.reload());
+        } else {
+          const err = await res.json();
+          Swal.fire('Gagal', err.message || 'Order gagal.', 'error');
+        }
+      } catch {
+        Swal.fire('Error', 'Order gagal.', 'error');
+      }
+    };
+
+    // On load: fetch cart, select all by default
+    window.onload = async function() {
+      await fetchCart();
+      cartData.forEach(item => selectedIds.add(item.id));
+      renderCart();
+      document.getElementById('selectAll').checked = true;
+    };
+  </script>
+</body>
+</html>
