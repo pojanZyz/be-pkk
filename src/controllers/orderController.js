@@ -4,13 +4,12 @@ export default {
   async createOrder(req, res) {
     try {
       const { items, totalPrice } = req.body;
-      // Ambil userId dari req.user (pastikan middleware auth mengisi req.user)
+      // Ambil userId dari token (req.user diisi oleh middleware autentikasi)
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized: userId not found" });
       }
-
-      // Create the order
+      // Create the order dengan userId
       const order = await Order.create({ userId, totalPrice });
 
       // Create order items
