@@ -3,9 +3,7 @@ import { Order, OrderItem, Product, User } from "../models/index.js";
 export default {
   async createOrder(req, res) {
     try {
-      const { items, totalPrice } = req.body;
-      // Ambil userId dari token (req.user diisi oleh middleware autentikasi)
-      const userId = req.user?.id;
+      const { userId, items, totalPrice } = req.body;
       if (!userId) {
         return res.status(401).json({ error: "Unauthorized: userId not found" });
       }
