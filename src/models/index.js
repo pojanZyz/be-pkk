@@ -25,7 +25,8 @@ Order.belongsTo(User);
 Category.hasMany(Product);
 Product.belongsTo(Category);
 
-Product.hasMany(OrderItem);
+// Tambahkan cascade delete pada relasi Product-OrderItem
+Product.hasMany(OrderItem, { onDelete: 'CASCADE' });
 OrderItem.belongsTo(Product);
 
 Order.hasMany(OrderItem);
@@ -36,7 +37,7 @@ User.hasOne(Cart);
 Cart.belongsTo(User);
 
 // Cart berisi banyak item
-Cart.hasMany(CartItem, { onDelete: 'CASCADE' });
+Cart.hasMany(CartItem);
 CartItem.belongsTo(Cart);
 
 // Setiap item di cart adalah product

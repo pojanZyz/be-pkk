@@ -238,11 +238,26 @@
           body: JSON.stringify({ userId, items, totalPrice })
         });
         if (res.ok) {
+          // Hapus cart yang di-checkout satu per satu
+          const selectedCartIds = cartData.filter(item => selectedIds.has(item.id)).map(item => item.id);
+          for (const cartId of selectedCartIds) {
+            await fetch(`https://be-pkk-production.up.railway.app/api/cart/${cartId}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+          }
           Swal.fire('Berhasil!', 'Order berhasil dibuat.', 'success').then(() => location.reload());
         } else {
-          const err = await res.json();
-          console.log('Gagal', err.error || err.message || 'Order gagal.', 'error');
-          Swal.fire('Gagal', err.error || err.message || 'Order gagal.', 'error');
+          let errMsg = 'Order gagal.';
+          try {
+            const err = await res.json();
+            errMsg = err.error || err.message || errMsg;
+          } catch (e) {
+            // Jika response bukan JSON (misal: HTML error page)
+            errMsg = 'Order gagal. (Response bukan JSON)';
+          }
+          console.log('Gagal', errMsg, 'error');
+          Swal.fire('Gagal', errMsg, 'error');
         }
       } catch {
         Swal.fire('Error', 'Order gagal.', 'error');
