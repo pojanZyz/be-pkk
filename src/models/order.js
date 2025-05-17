@@ -8,6 +8,10 @@ import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
   return sequelize.define('Order', {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     status: {
       type: DataTypes.STRING,
       defaultValue: 'pending',

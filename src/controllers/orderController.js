@@ -1,13 +1,17 @@
-// Ganti import model dari file model ke index.js
-import { Order, OrderItem, Product } from "../models/index.js";
+import { Order, OrderItem, Product, User } from "../models/index.js";
 
 export default {
   async createOrder(req, res) {
     try {
       const { items, totalPrice } = req.body;
+      // Ambil userId dari req.user (pastikan middleware auth mengisi req.user)
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: userId not found" });
+      }
 
       // Create the order
-      const order = await Order.create({ totalPrice });
+      const order = await Order.create({ userId, totalPrice });
 
       // Create order items
       const orderItems = await Promise.all(
