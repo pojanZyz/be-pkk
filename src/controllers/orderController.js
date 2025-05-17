@@ -8,7 +8,7 @@ export default {
         return res.status(401).json({ error: "Unauthorized: userId not found" });
       }
       // Create the order dengan userId
-      const order = await Order.create({ userId, totalPrice });
+      const order = await Order.create({ UserId : userId, totalPrice });
 
       // Create order items
       const orderItems = await Promise.all(

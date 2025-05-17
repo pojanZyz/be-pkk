@@ -58,6 +58,15 @@
       return Number(n).toLocaleString('id-ID');
     }
 
+    // Helper: Decode JWT (ambil payload)
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+
     // Fetch cart data
     async function fetchCart() {
       const token = localStorage.getItem('token');
@@ -213,13 +222,20 @@
         return;
       }
       const token = localStorage.getItem('token');
+      // Ambil userId dari token
+      const payload = parseJwt(token);
+      const userId = payload?.id || payload?.userId;
+      if (!userId) {
+        Swal.fire('Gagal', 'User tidak ditemukan di token.', 'error');
+        return;
+      }
       // Debug log
-      console.log('Checkout payload:', { items, totalPrice });
+      console.log('Checkout payload:', { userId, items, totalPrice });
       try {
         const res = await fetch('https://be-pkk-production.up.railway.app/api/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ items, totalPrice })
+          body: JSON.stringify({ userId, items, totalPrice })
         });
         if (res.ok) {
           Swal.fire('Berhasil!', 'Order berhasil dibuat.', 'success').then(() => location.reload());
