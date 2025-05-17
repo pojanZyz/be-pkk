@@ -1,3 +1,4 @@
+import { use } from 'react';
 import { Order, OrderItem, Product } from '../models/index.js';
 
 const getHistoryByUser = async (req, res) => {
@@ -5,7 +6,7 @@ const getHistoryByUser = async (req, res) => {
     const userId = req.params.userId;
 
     const orders = await Order.findAll({
-      where: { userId },
+      where: { UserId : userId },
       include: [{
         model: OrderItem,
         include: [Product],
