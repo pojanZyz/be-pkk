@@ -73,7 +73,7 @@ export {
   OrderModel as Order,
   OrderItemModel as OrderItem,
   ProductModel as Product,
-  // UserModel as User, // Uncomment jika ada model User
+  UserModel as User, // Uncomment jika ada model User
   db,
   User,
   Category,
