@@ -10,7 +10,7 @@ export default (sequelize) => {
   return sequelize.define('Order', {
     status: {
       type: DataTypes.ENUM('completed','pending'),
-      defaultValue: 'pending',
+      allowNull: false,
     },
     totalPrice: {
       type: DataTypes.INTEGER,
