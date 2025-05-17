@@ -18,8 +18,8 @@ export default {
             throw new Error(`Product with ID ${item.productId} not found`);
           }
           return OrderItem.create({
-            orderId: order.id,
-            productId: item.productId,
+            OrderId: order.id,
+            ProductId: item.productId,
             quantity: item.quantity,
             price: product.price * item.quantity,
           });
