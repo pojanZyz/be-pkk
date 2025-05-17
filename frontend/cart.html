@@ -202,7 +202,7 @@
 
     // Checkout
     document.getElementById('checkoutBtn').onclick = async function() {
-      // Kirim productId dan quantity sesuai kebutuhan controller backend
+      // Pastikan hanya mengirim productId dan quantity
       const items = cartData.filter(item => selectedIds.has(item.id)).map(item => ({
         productId: item.Product.id,
         quantity: item.quantity
@@ -225,7 +225,8 @@
           Swal.fire('Berhasil!', 'Order berhasil dibuat.', 'success').then(() => location.reload());
         } else {
           const err = await res.json();
-          Swal.fire('Gagal', err.message || 'Order gagal.', 'error');
+          console.log('Gagal', err.error || err.message || 'Order gagal.', 'error');
+          Swal.fire('Gagal', err.error || err.message || 'Order gagal.', 'error');
         }
       } catch {
         Swal.fire('Error', 'Order gagal.', 'error');

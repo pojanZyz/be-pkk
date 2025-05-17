@@ -1,6 +1,5 @@
-import Order from "../models/order.js";
-import OrderItem from "../models/orderItem.js";
-import Product from "../models/product.js";
+// Ganti import model dari file model ke index.js
+import { Order, OrderItem, Product } from "../models/index.js";
 
 export default {
   async createOrder(req, res) {
