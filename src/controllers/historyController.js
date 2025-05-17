@@ -5,7 +5,7 @@ const getHistoryByUser = async (req, res) => {
     const userId = req.params.userId;
 
     const orders = await Order.findAll({
-      where: { UserId : userId },
+      where: { UserId : userId, status: 'completed' },
       include: [{
         model: OrderItem,
         include: [Product],
@@ -19,7 +19,7 @@ const getHistoryByUser = async (req, res) => {
       items: order.OrderItems.map(item => ({
         productName: item.Product.name,
         quantity: item.quantity,
-        totalPrice: item.total_price,
+        totalPrice: item.price,
       })),
     }));
 
