@@ -9,7 +9,7 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   return sequelize.define('Order', {
     status: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('completed','pending'),
       defaultValue: 'pending',
     },
     totalPrice: {
