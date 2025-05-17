@@ -1,3 +1,5 @@
+import Sequelize from 'sequelize';
+import sequelize from '../config/database.js';
 import {db} from '../config/database.js';
 
 // Import semua model sebagai fungsi
@@ -8,6 +10,10 @@ import defineOrderItem from './orderItem.js';
 import defineCategory from './category.js';
 import defineCart from './cart.js';
 import defineCartItem from './cartItem.js';
+import Order from './order.js';
+import OrderItem from './orderItem.js';
+import Product from './product.js';
+// import User from './user.js'; // Uncomment jika ada model User
 
 // inisialisasi model
 const User = defineUser(db);
@@ -17,6 +23,10 @@ const OrderItem = defineOrderItem(db);
 const Category = defineCategory(db);
 const Cart = defineCart(db);
 const CartItem = defineCartItem(db);
+const OrderModel = Order(sequelize);
+const OrderItemModel = OrderItem(sequelize);
+const ProductModel = Product(sequelize);
+// const UserModel = User(sequelize); // Uncomment jika ada model User
 
 // Relasi antar model
 User.hasMany(Order);
@@ -43,13 +53,29 @@ CartItem.belongsTo(Cart);
 Product.hasMany(CartItem);
 CartItem.belongsTo(Product);
 
+// Relasi Order dan OrderItem
+OrderModel.hasMany(OrderItemModel, { foreignKey: 'orderId' });
+OrderItemModel.belongsTo(OrderModel, { foreignKey: 'orderId' });
 
+// Relasi Product dan OrderItem
+ProductModel.hasMany(OrderItemModel, { foreignKey: 'productId' });
+OrderItemModel.belongsTo(ProductModel, { foreignKey: 'productId' });
+
+// Relasi User dan Order (jika ada User)
+/// Uncomment jika ada model User
+// UserModel.hasMany(OrderModel, { foreignKey: 'userId' });
+// OrderModel.belongsTo(UserModel, { foreignKey: 'userId' });
+
+// Export semua model
 export {
+  sequelize,
+  Sequelize,
+  OrderModel as Order,
+  OrderItemModel as OrderItem,
+  ProductModel as Product,
+  // UserModel as User, // Uncomment jika ada model User
   db,
   User,
-  Product,
-  Order,
-  OrderItem,
   Category,
   Cart,
   CartItem,
