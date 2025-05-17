@@ -21,7 +21,7 @@ export default {
             orderId: order.id,
             productId: item.productId,
             quantity: item.quantity,
-            price: product.price * item.quantity,
+            price: totalPrice,
           });
         })
       );
