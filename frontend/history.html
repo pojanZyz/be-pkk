@@ -41,6 +41,9 @@
         <div class="container mx-auto px-4 py-6">
             <div class="flex justify-between items-center">
                 <h1 class="text-light text-2xl font-bold">HISTORY TRANSACTION</h1>
+                <a href="index.html" class="bg-light text-primary px-4 py-2 rounded-lg font-semibold shadow hover:bg-tertiary transition">
+                    &larr; Kembali ke Halaman Utama
+                </a>
             </div>
         </div>
     </header>
@@ -407,7 +410,36 @@
                 }
                 
                 const date = new Date(transaction.createdAt || new Date());
-                
+
+                // Ambil detail produk dari OrderItems
+                let produkHtml = '';
+                if (Array.isArray(transaction.OrderItems) && transaction.OrderItems.length > 0) {
+                    produkHtml = `
+                        <table class="w-full text-sm mb-2">
+                            <thead>
+                                <tr>
+                                    <th class="text-left py-1">Nama Produk</th>
+                                    <th class="text-left py-1">Qty</th>
+                                    <th class="text-left py-1">Harga Satuan</th>
+                                    <th class="text-left py-1">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${transaction.OrderItems.map(item => `
+                                    <tr>
+                                        <td class="py-1">${item.Product ? item.Product.name : '-'}</td>
+                                        <td class="py-1">${item.quantity}</td>
+                                        <td class="py-1">Rp ${formatCurrency(item.Product ? item.Product.price : 0)}</td>
+                                        <td class="py-1">Rp ${formatCurrency(item.price)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    produkHtml = `<div class="text-gray-500">Tidak ada produk pada transaksi ini.</div>`;
+                }
+
                 modalContent.innerHTML = `
                     <div class="bg-light p-4 rounded-lg mb-4">
                         <h4 class="font-bold text-lg text-primary mb-2">Informasi Transaksi</h4>
@@ -433,27 +465,13 @@
                     
                     <div class="bg-light p-4 rounded-lg mb-4">
                         <h4 class="font-bold text-lg text-primary mb-2">Detail Produk</h4>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-gray-600">Nama Produk:</p>
-                                <p class="font-medium">${transaction.productName || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">Harga:</p>
-                                <p class="font-medium">Rp ${formatCurrency(transaction.amount || 0)}</p>
-                            </div>
-                            <div class="col-span-2">
-                                <p class="text-gray-600">Deskripsi:</p>
-                                <p class="font-medium">${transaction.description || 'Tidak ada deskripsi'}</p>
-                            </div>
-                        </div>
+                        ${produkHtml}
                     </div>
                     
                     <div class="bg-light p-4 rounded-lg">
                         <h4 class="font-bold text-lg text-primary mb-2">Informasi Tambahan</h4>
                         <div class="space-y-2">
-                            <p><span class="text-gray-600">Metode Pembayaran:</span> ${transaction.paymentMethod || 'N/A'}</p>
-                            <p><span class="text-gray-600">Catatan:</span> ${transaction.notes || 'Tidak ada catatan'}</p>
+                            <p><span class="text-gray-600">Total Harga:</span> Rp ${formatCurrency(transaction.totalPrice || 0)}</p>
                         </div>
                     </div>
                 `;

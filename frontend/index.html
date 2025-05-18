@@ -502,6 +502,7 @@
         };
       }
         updateCartCount();
+        updateHistoryCount();
     }
 
     // Update cart count
@@ -528,6 +529,33 @@
         cartCount.textContent = items.length;
       } catch (e) {
         cartCount.textContent = '0';
+      }
+    }
+
+    // Update history count
+    async function updateHistoryCount() {
+      const historyCount = document.getElementById('historyCount');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        historyCount.textContent = '0';
+        return;
+      }
+      try {
+        const res = await fetch(`${BASE_API}/order`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) {
+          historyCount.textContent = '0';
+          return;
+        }
+        const data = await res.json();
+        // data bisa array langsung atau {data: array}
+        const items = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+        historyCount.textContent = items.length;
+      } catch (e) {
+        historyCount.textContent = '0';
       }
     }
 
