@@ -26,6 +26,14 @@
             background-size: 20px 20px;
             background-position: 0 0, 10px 10px;
         }
+        .loader {
+            border-top-color: #A59D84;
+            animation: spinner 1s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-pattern min-h-screen">
@@ -45,135 +53,45 @@
 
         <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex space-x-2">
-                <button class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Semua</button>
-                <button class="bg-white hover:bg-gray-100 text-primary px-4 py-2 rounded-lg border border-primary">Pembayaran</button>
-                <button class="bg-white hover:bg-gray-100 text-primary px-4 py-2 rounded-lg border border-primary">Transaksi</button>
+                <button id="filterAll" class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg filter-btn">Semua</button>
+                <button id="filterCompleted" class="bg-white hover:bg-gray-100 text-primary px-4 py-2 rounded-lg border border-primary filter-btn">Completed</button>
+                <button id="filterPending" class="bg-white hover:bg-gray-100 text-primary px-4 py-2 rounded-lg border border-primary filter-btn">Pending</button>
+                <button id="filterCanceled" class="bg-white hover:bg-gray-100 text-primary px-4 py-2 rounded-lg border border-primary filter-btn">Canceled</button>
             </div>
             <div class="flex space-x-2">
-                <input type="text" placeholder="Cari aktivitas..." class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-                <button class="bg-secondary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Cari</button>
+                <input type="text" id="searchInput" placeholder="Cari aktivitas..." class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <button id="searchButton" class="bg-secondary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Cari</button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
-            <div class="px-6 py-4 bg-tertiary border-b border-gray-200">
-                <h3 class="text-xl font-bold text-primary">Mei 2025</h3>
-            </div>
-            
-            <div class="divide-y divide-gray-100">
-                <!-- History Item 1 -->
-                <div class="p-6 hover:bg-light transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-lg font-semibold">Pembayaran Tagihan Listrik</h4>
-                            <p class="text-gray-600 text-sm">16 Mei 2025, 14:30 WIB</p>
-                        </div>
-                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Berhasil</span>
-                    </div>
-                    <p class="text-gray-700 mb-3">Pembayaran tagihan listrik untuk bulan Mei 2025 sebesar Rp 450.000.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-primary font-medium">No. Transaksi: TRX-20250516-001</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">Lihat Detail</button>
-                    </div>
-                </div>
-
-                <!-- History Item 2 -->
-                <div class="p-6 hover:bg-light transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-lg font-semibold">Transfer Dana</h4>
-                            <p class="text-gray-600 text-sm">15 Mei 2025, 10:12 WIB</p>
-                        </div>
-                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Berhasil</span>
-                    </div>
-                    <p class="text-gray-700 mb-3">Transfer dana ke Budi Santoso sebesar Rp 1.200.000.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-primary font-medium">No. Transaksi: TRX-20250515-045</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">Lihat Detail</button>
-                    </div>
-                </div>
-
-                <!-- History Item 3 -->
-                <div class="p-6 hover:bg-light transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-lg font-semibold">Pembayaran E-Commerce</h4>
-                            <p class="text-gray-600 text-sm">13 Mei 2025, 16:45 WIB</p>
-                        </div>
-                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Berhasil</span>
-                    </div>
-                    <p class="text-gray-700 mb-3">Pembayaran produk dari TokoOnline sebesar Rp 875.000.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-primary font-medium">No. Transaksi: TRX-20250513-189</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">Lihat Detail</button>
-                    </div>
-                </div>
-            </div>
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="flex justify-center items-center py-12 hidden">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
-            <div class="px-6 py-4 bg-tertiary border-b border-gray-200">
-                <h3 class="text-xl font-bold text-primary">April 2025</h3>
-            </div>
-            
-            <div class="divide-y divide-gray-100">
-                <!-- History Item 4 -->
-                <div class="p-6 hover:bg-light transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-lg font-semibold">Pembayaran BPJS Kesehatan</h4>
-                            <p class="text-gray-600 text-sm">28 April 2025, 09:15 WIB</p>
-                        </div>
-                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Berhasil</span>
-                    </div>
-                    <p class="text-gray-700 mb-3">Pembayaran BPJS Kesehatan untuk bulan Mei 2025 sebesar Rp 150.000.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-primary font-medium">No. Transaksi: TRX-20250428-076</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">Lihat Detail</button>
-                    </div>
-                </div>
-
-                <!-- History Item 5 -->
-                <div class="p-6 hover:bg-light transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-lg font-semibold">Pembayaran Tagihan Air</h4>
-                            <p class="text-gray-600 text-sm">20 April 2025, 11:30 WIB</p>
-                        </div>
-                        <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Pending</span>
-                    </div>
-                    <p class="text-gray-700 mb-3">Pembayaran tagihan air untuk bulan April 2025 sebesar Rp 250.000.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-primary font-medium">No. Transaksi: TRX-20250420-123</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">Lihat Detail</button>
-                    </div>
-                </div>
-
-                <!-- History Item 6 -->
-                <div class="p-6 hover:bg-light transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-lg font-semibold">Transfer Dana</h4>
-                            <p class="text-gray-600 text-sm">15 April 2025, 13:42 WIB</p>
-                        </div>
-                        <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Gagal</span>
-                    </div>
-                    <p class="text-gray-700 mb-3">Percobaan transfer dana ke Andi Wijaya sebesar Rp 2.500.000.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-primary font-medium">No. Transaksi: TRX-20250415-098</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">Lihat Detail</button>
-                    </div>
-                </div>
-            </div>
+        <!-- Error Message -->
+        <div id="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6 hidden">
+            <span id="errorText">An error occurred while fetching the data.</span>
         </div>
 
-        <div class="mt-6 flex justify-center">
+        <!-- No Results Message -->
+        <div id="noResultsMessage" class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-6 hidden">
+            <span>Tidak ada data yang sesuai dengan pencarian Anda.</span>
+        </div>
+
+        <!-- Transaction Container -->
+        <div id="transactionContainer">
+            <!-- Transaction data will be loaded here -->
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="mt-6 flex justify-center">
             <nav class="inline-flex rounded-md shadow">
-                <a href="#" class="py-2 px-4 bg-primary text-white rounded-l-md hover:bg-opacity-90">Sebelumnya</a>
-                <a href="#" class="py-2 px-4 bg-white text-primary border-t border-b border-primary hover:bg-light">1</a>
-                <a href="#" class="py-2 px-4 bg-tertiary text-primary border-t border-b border-primary font-bold">2</a>
-                <a href="#" class="py-2 px-4 bg-white text-primary border-t border-b border-primary hover:bg-light">3</a>
-                <a href="#" class="py-2 px-4 bg-primary text-white rounded-r-md hover:bg-opacity-90">Selanjutnya</a>
+                <button id="prevPage" class="py-2 px-4 bg-primary text-white rounded-l-md hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">Sebelumnya</button>
+                <div id="pageNumbers" class="flex">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button id="nextPage" class="py-2 px-4 bg-primary text-white rounded-r-md hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">Selanjutnya</button>
             </nav>
         </div>
     </main>
@@ -207,37 +125,456 @@
         </div>
     </footer>
 
+    <!-- Transaction Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-primary">Detail Transaksi</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modalContent" class="mt-4">
+                <!-- Modal content will be loaded here -->
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="closeModalButton" class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Fungsi untuk menampilkan popup detail transaksi
-            const detailButtons = document.querySelectorAll('button:contains("Lihat Detail")');
+            // API endpoint
+            const API_URL = 'https://be-pkk-production.up.railway.app/api/order';
             
-            detailButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const transactionId = this.closest('.p-6').querySelector('.text-primary').textContent;
-                    alert(`Detail transaksi untuk ${transactionId} akan ditampilkan di sini.`);
-                });
-            });
+            // State variables
+            let currentPage = 1;
+            let itemsPerPage = 5;
+            let currentFilter = 'all';
+            let searchQuery = '';
+            let allTransactions = [];
+            let filteredTransactions = [];
+            
+            // DOM Elements
+            const transactionContainer = document.getElementById('transactionContainer');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const noResultsMessage = document.getElementById('noResultsMessage');
+            const prevPageBtn = document.getElementById('prevPage');
+            const nextPageBtn = document.getElementById('nextPage');
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const detailModal = document.getElementById('detailModal');
+            const closeModal = document.getElementById('closeModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const modalContent = document.getElementById('modalContent');
+            
+            // Fetch transactions from API
+            async function fetchTransactions() {
+                showLoading(true);
+                hideError();
+                hideNoResults();
 
-            // Fungsi untuk filter berdasarkan tombol kategori
-            const filterButtons = document.querySelectorAll('.flex.space-x-2 button');
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        throw new Error('Anda harus login untuk melihat riwayat transaksi.');
+                    }
+                    const response = await fetch(API_URL, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    allTransactions = data; // Store all transactions
+                    processTransactions();
+                } catch (error) {
+                    console.error('Error fetching transactions:', error);
+                    showError(error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
             
+            // Process and filter transactions based on current state
+            function processTransactions() {
+                // Apply filters
+                if (currentFilter === 'all') {
+                    filteredTransactions = [...allTransactions];
+                } else {
+                    filteredTransactions = allTransactions.filter(transaction => 
+                        transaction.status.toLowerCase() === currentFilter.toLowerCase()
+                    );
+                }
+                
+                // Apply search query
+                if (searchQuery.trim() !== '') {
+                    const query = searchQuery.toLowerCase();
+                    filteredTransactions = filteredTransactions.filter(transaction => 
+                        transaction.id.toString().toLowerCase().includes(query) ||
+                        (transaction.description && transaction.description.toLowerCase().includes(query)) ||
+                        (transaction.productName && transaction.productName.toLowerCase().includes(query)) ||
+                        (transaction.status && transaction.status.toLowerCase().includes(query))
+                    );
+                }
+                
+                // Check if we have results
+                if (filteredTransactions.length === 0) {
+                    showNoResults();
+                    updatePagination();
+                    renderTransactions([]);
+                    return;
+                }
+                
+                hideNoResults();
+                updatePagination();
+                
+                // Get current page transactions
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
+                
+                renderTransactions(currentTransactions);
+            }
+            
+            // Render transactions to the DOM
+            function renderTransactions(transactions) {
+                transactionContainer.innerHTML = '';
+                
+                // Group transactions by month
+                const groupedByMonth = groupTransactionsByMonth(transactions);
+                
+                // Render each month group
+                for (const [month, monthTransactions] of Object.entries(groupedByMonth)) {
+                    const monthContainer = document.createElement('div');
+                    monthContainer.className = 'bg-white rounded-xl shadow-md overflow-hidden mb-6';
+                    
+                    // Month header
+                    const monthHeader = document.createElement('div');
+                    monthHeader.className = 'px-6 py-4 bg-tertiary border-b border-gray-200';
+                    monthHeader.innerHTML = `<h3 class="text-xl font-bold text-primary">${month}</h3>`;
+                    monthContainer.appendChild(monthHeader);
+                    
+                    // Transactions list for the month
+                    const transactionsList = document.createElement('div');
+                    transactionsList.className = 'divide-y divide-gray-100';
+                    
+                    // Add each transaction
+                    monthTransactions.forEach(transaction => {
+                        transactionsList.appendChild(createTransactionElement(transaction));
+                    });
+                    
+                    monthContainer.appendChild(transactionsList);
+                    transactionContainer.appendChild(monthContainer);
+                }
+            }
+            
+            // Create a transaction element
+            function createTransactionElement(transaction) {
+                const date = new Date(transaction.createdAt || new Date());
+                const formattedDate = formatDate(date);
+                const formattedTime = formatTime(date);
+                
+                let statusClass;
+                let statusText;
+                
+                switch(transaction.status.toLowerCase()) {
+                    case 'completed':
+                        statusClass = 'bg-green-100 text-green-800';
+                        statusText = 'Berhasil';
+                        break;
+                    case 'pending':
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                        statusText = 'Pending';
+                        break;
+                    case 'canceled':
+                        statusClass = 'bg-red-100 text-red-800';
+                        statusText = 'Gagal';
+                        break;
+                    default:
+                        statusClass = 'bg-gray-100 text-gray-800';
+                        statusText = transaction.status;
+                }
+                
+                const transactionElement = document.createElement('div');
+                transactionElement.className = 'p-6 hover:bg-light transition-colors';
+                transactionElement.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="text-lg font-semibold">${transaction.productName || 'Transaksi'}</h4>
+                            <p class="text-gray-600 text-sm">${formattedDate}, ${formattedTime}</p>
+                        </div>
+                        <span class="${statusClass} text-xs font-medium px-2.5 py-0.5 rounded-full">${statusText}</span>
+                    </div>
+                    <p class="text-gray-700 mb-3">${transaction.description || `Transaksi ${transaction.productName || ''} dengan ID ${transaction.id}`}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-primary font-medium">No. Transaksi: TRX-${transaction.id}</span>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm view-detail" data-id="${transaction.id}">Lihat Detail</button>
+                    </div>
+                `;
+                
+                return transactionElement;
+            }
+            
+            // Group transactions by month
+            function groupTransactionsByMonth(transactions) {
+                const groups = {};
+                
+                transactions.forEach(transaction => {
+                    const date = new Date(transaction.createdAt || new Date());
+                    const month = `${getMonthName(date.getMonth())} ${date.getFullYear()}`;
+                    
+                    if (!groups[month]) {
+                        groups[month] = [];
+                    }
+                    
+                    groups[month].push(transaction);
+                });
+                
+                return groups;
+            }
+            
+            // Format date: DD Bulan YYYY
+            function formatDate(date) {
+                return `${date.getDate()} ${getMonthName(date.getMonth())} ${date.getFullYear()}`;
+            }
+            
+            // Format time: HH:MM WIB
+            function formatTime(date) {
+                return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} WIB`;
+            }
+            
+            // Get month name in Indonesian
+            function getMonthName(monthIndex) {
+                const months = [
+                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ];
+                return months[monthIndex];
+            }
+            
+            // Update pagination controls
+            function updatePagination() {
+                const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+                
+                // Update prev/next buttons
+                prevPageBtn.disabled = currentPage <= 1;
+                nextPageBtn.disabled = currentPage >= totalPages;
+                
+                // Generate page numbers
+                pageNumbersContainer.innerHTML = '';
+                
+                // Simplified pagination: show max 5 pages
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                
+                if (endPage - startPage < 4 && startPage > 1) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = i === currentPage 
+                        ? 'py-2 px-4 bg-tertiary text-primary border-t border-b border-primary font-bold'
+                        : 'py-2 px-4 bg-white text-primary border-t border-b border-primary hover:bg-light';
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener('click', () => {
+                        currentPage = i;
+                        processTransactions();
+                    });
+                    pageNumbersContainer.appendChild(pageBtn);
+                }
+            }
+            
+            // Show transaction detail in modal
+            function showTransactionDetail(transactionId) {
+                const transaction = allTransactions.find(t => t.id == transactionId);
+                
+                if (!transaction) {
+                    modalContent.innerHTML = '<p class="text-red-600">Transaksi tidak ditemukan.</p>';
+                    return;
+                }
+                
+                const date = new Date(transaction.createdAt || new Date());
+                
+                modalContent.innerHTML = `
+                    <div class="bg-light p-4 rounded-lg mb-4">
+                        <h4 class="font-bold text-lg text-primary mb-2">Informasi Transaksi</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600">ID Transaksi:</p>
+                                <p class="font-medium">TRX-${transaction.id}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Status:</p>
+                                <p class="font-medium">${transaction.status}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Tanggal:</p>
+                                <p class="font-medium">${formatDate(date)}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Waktu:</p>
+                                <p class="font-medium">${formatTime(date)}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded-lg mb-4">
+                        <h4 class="font-bold text-lg text-primary mb-2">Detail Produk</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600">Nama Produk:</p>
+                                <p class="font-medium">${transaction.productName || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Harga:</p>
+                                <p class="font-medium">Rp ${formatCurrency(transaction.amount || 0)}</p>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="text-gray-600">Deskripsi:</p>
+                                <p class="font-medium">${transaction.description || 'Tidak ada deskripsi'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded-lg">
+                        <h4 class="font-bold text-lg text-primary mb-2">Informasi Tambahan</h4>
+                        <div class="space-y-2">
+                            <p><span class="text-gray-600">Metode Pembayaran:</span> ${transaction.paymentMethod || 'N/A'}</p>
+                            <p><span class="text-gray-600">Catatan:</span> ${transaction.notes || 'Tidak ada catatan'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                detailModal.classList.remove('hidden');
+            }
+            
+            // Format currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('id-ID').format(amount);
+            }
+            
+            // Show loading indicator
+            function showLoading(show) {
+                if (show) {
+                    loadingIndicator.classList.remove('hidden');
+                } else {
+                    loadingIndicator.classList.add('hidden');
+                }
+            }
+            
+            // Show error message
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+            }
+            
+            // Hide error message
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+            
+            // Show no results message
+            function showNoResults() {
+                noResultsMessage.classList.remove('hidden');
+            }
+            
+            // Hide no results message
+            function hideNoResults() {
+                noResultsMessage.classList.add('hidden');
+            }
+            
+            // Event Listeners
+            // Previous page button
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    processTransactions();
+                }
+            });
+            
+            // Next page button
+            nextPageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    processTransactions();
+                }
+            });
+            
+            // Search button
+            searchButton.addEventListener('click', () => {
+                searchQuery = searchInput.value;
+                currentPage = 1;
+                processTransactions();
+            });
+            
+            // Enter key for search
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchQuery = searchInput.value;
+                    currentPage = 1;
+                    processTransactions();
+                }
+            });
+            
+            // Filter buttons
             filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', () => {
+                    // Update active button
                     filterButtons.forEach(btn => {
                         btn.classList.remove('bg-primary', 'text-white');
                         btn.classList.add('bg-white', 'text-primary');
                     });
+                    button.classList.remove('bg-white', 'text-primary');
+                    button.classList.add('bg-primary', 'text-white');
                     
-                    this.classList.remove('bg-white', 'text-primary');
-                    this.classList.add('bg-primary', 'text-white');
-                    
-                    const filter = this.textContent.trim();
-                    console.log(`Filter aktivitas berdasarkan: ${filter}`);
-                    // Implementasi filter data
+                    // Set filter based on button id
+                    const filterId = button.id.replace('filter', '');
+                    currentFilter = filterId === 'All' ? 'all' : filterId;
+                    currentPage = 1;
+                    processTransactions();
                 });
             });
+            
+            // Transaction detail view
+            transactionContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('view-detail')) {
+                    const transactionId = e.target.getAttribute('data-id');
+                    showTransactionDetail(transactionId);
+                }
+            });
+            
+            // Close modal handlers
+            closeModal.addEventListener('click', () => {
+                detailModal.classList.add('hidden');
+            });
+            
+            closeModalButton.addEventListener('click', () => {
+                detailModal.classList.add('hidden');
+            });
+            
+            // Close modal when clicking outside
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) {
+                    detailModal.classList.add('hidden');
+                }
+            });
+            
+            // Initialize application
+            fetchTransactions();
         });
     </script>
 </body>

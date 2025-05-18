@@ -54,7 +54,7 @@ router.delete(
 
 // Order routes
 router.post("/order", loginValidation, orderController.createOrder);
-router.get("/order", adminValidation, orderController.getAllOrders);
+router.get("/order", orderController.getAllOrders);
 router.get("/order/:id", loginValidation, orderController.getOrderById);
 router.put("/order/:id/status", adminValidation, orderController.updateOrderStatus);
 router.delete("/order/:id", adminValidation, orderController.deleteOrder);
