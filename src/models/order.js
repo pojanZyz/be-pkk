@@ -9,7 +9,7 @@ import { DataTypes } from 'sequelize';
 export default (sequelize) => {
   return sequelize.define('Order', {
     status: {
-      type: DataTypes.ENUM('completed','pending'),
+      type: DataTypes.ENUM('completed','pending','canceled'),
       allowNull: false,
     },
     totalPrice: {
