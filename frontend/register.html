@@ -273,7 +273,7 @@
         const response = await fetch('https://be-pkk-production.up.railway.app/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password, role })
+          body: JSON.stringify({ username, email, password })
         });
 
         const result = await response.json();
