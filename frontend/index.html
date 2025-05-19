@@ -30,13 +30,13 @@
       font-size: 2rem;
       font-weight: bold;
       letter-spacing: 3px;
-      color: #000 !important;
+      color: #fff !important;
       text-transform: uppercase;
     }
     
     .nav-link {
       color: #000 !important;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       margin: 0 1rem;
       text-transform: none;
       letter-spacing: 0.5px;
@@ -45,7 +45,7 @@
     .hero-section {
       height: 100vh;
       background-position: center;
-      background-size:cover;
+      background-size:100%;
       position: relative;
     }
     
@@ -92,7 +92,7 @@
     
     .collection-section {
       background-color: var(--pale-taupe);
-      padding: 5rem 0;
+      padding: 10rem 0;
       text-align: center;
       position: relative;
     }
@@ -296,12 +296,37 @@
         margin-right: auto;
       }
     }
+    /* Tambahkan style untuk scroll horizontal pada modal kategori */
+    #categoryModalBody {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 1rem;
+      padding-bottom: 1rem;
+    }
+    #categoryModalBody .col-md-4 {
+      min-width: 270px;
+      flex: 0 0 auto;
+    }
+    /* Sembunyikan scrollbar di Webkit */
+    #categoryModalBody::-webkit-scrollbar {
+      height: 8px;
+      background: #ecebde;
+    }
+    #categoryModalBody::-webkit-scrollbar-thumb {
+      background: #d7d3bf;
+      border-radius: 4px;
+    }
+
+    .shadow{
+      filter: drop-shadow(0 0 10px black);
+    }
   </style>
 </head>
 <body>
 
   <!-- Hero Section -->
-  <section class="hero-section" style="background-image: url('img/bg_main.jpeg'); background-position: left bottom;">
+  <section class="hero-section" style="background-image: url('img/bg_main.jpg'); background-position: left bottom;">
       <nav class="navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand mx-auto" href="#">MIX SHOES</a>
@@ -323,16 +348,16 @@
             <a class="nav-link" href="#">Sport</a>
           </li>
           <li class="nav-item">
-            <button id="authButton" class="btn btn-outline-dark">Sign In</button>
+            <button id="authButton" class="btn btn-outline-light shadow">Sign In</button>
           </li>
           <li class="nav-item">
-            <a href="/frontend/cart.html" class="btn btn-outline-dark cart-btn">
+            <a href="/frontend/cart.html" class="btn btn-outline-light shadow cart-btn">
               <i class="bi bi-cart"></i>
               <span class="cart-count" id="cartCount">0</span>
             </a>
           </li>
           <li class="nav-item">
-            <a href="/frontend/history.html" class="btn btn-outline-dark cart-btn">
+            <a href="/frontend/history.html" class="btn btn-outline-light shadow cart-btn">
               <i class="bi bi-clock-history"></i>
               <span class="history-count" id="historyCount">0</span>
             </a>
@@ -352,32 +377,32 @@
   </section>
 
   <!-- Collection Section -->
-  <section class="collection-section mt-5">
+  <section class="collection-section mt-5" style="background: url('img/bg_sneakers.jpg'); background-size: cover; background-position: bottom ;">
     <div class="container">
       <div class="row">
         <div class="col-12">
           <h2 class="collection-title">Sneakers</h2>
-          <button class="view-btn">VIEW</button>
+          <button class="view-btn btn btn-outline-dark">VIEW</button>
         </div>
       </div>
     </div>
   </section>
-  <section class="collection-section">
+  <section class="collection-section" style="background: url('img/bg_heels.jpg'); background-size: cover; background-position: center -87rem ;">
     <div class="container">
       <div class="row">
         <div class="col-12">
           <h2 class="collection-title">Heels</h2>
-          <button class="view-btn">VIEW</button>
+          <button class="view-btn btn btn-outline-dark">VIEW</button>
         </div>
       </div>
     </div>
   </section>
-  <section class="collection-section">
+  <section class="collection-section" style="background: url('img/bg_sport.jpg'); background-size: cover; background-position: center -70rem ;">
     <div class="container">
       <div class="row">
         <div class="col-12">
           <h2 class="collection-title">Sport</h2>
-          <button class="view-btn">VIEW</button>
+          <button class="view-btn btn btn-outline-dark">VIEW</button>
         </div>
       </div>
     </div>
@@ -541,6 +566,10 @@
         return;
       }
       try {
+        // Ambil userId dari token JWT
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userId = payload.id;
+
         const res = await fetch(`${BASE_API}/order`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -553,7 +582,9 @@
         const data = await res.json();
         // data bisa array langsung atau {data: array}
         const items = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
-        historyCount.textContent = items.length;
+        // Hanya hitung transaksi milik user login
+        const userItems = items.filter(item => item.UserId == userId);
+        historyCount.textContent = userItems.length;
       } catch (e) {
         historyCount.textContent = '0';
       }
@@ -870,6 +901,7 @@
         if (!products.length) {
           body.innerHTML = '<div class="text-center text-muted">No products found in this category.</div>';
         } else {
+          // Ganti row menjadi flex container horizontal
           body.innerHTML = products.map(p => `
             <div class="col-md-4 mb-3">
               <div class="card product-card" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" data-img="${p.image}">

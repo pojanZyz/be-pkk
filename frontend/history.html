@@ -129,7 +129,7 @@
     </footer>
 
     <!-- Transaction Detail Modal -->
-    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 hidden">
         <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-primary">Detail Transaksi</h3>
@@ -142,8 +142,51 @@
             <div id="modalContent" class="mt-4">
                 <!-- Modal content will be loaded here -->
             </div>
-            <div class="mt-6 flex justify-end">
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="paymentButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg hidden">Pembayaran</button>
                 <button id="closeModalButton" class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Tutup</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-primary">Pembayaran</h3>
+                <button id="closePaymentModal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="paymentContent" class="mt-4">
+                <!-- Payment form will be loaded here -->
+            </div>
+            <div id="paymentProcessing" class="hidden mt-4 text-center">
+                <div class="loader mx-auto mb-2 ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+                <p class="text-gray-700">Memproses pembayaran...</p>
+            </div>
+            <div id="paymentSuccess" class="hidden mt-4 text-center">
+                <div class="mx-auto mb-4 flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                    <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Pembayaran Berhasil!</h3>
+                <p class="text-gray-600 mt-2">Transaksi Anda telah berhasil diselesaikan.</p>
+                <button id="closePaymentSuccess" class="mt-4 w-full bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Kembali ke Riwayat</button>
+            </div>
+            <div id="paymentError" class="hidden mt-4 text-center">
+                <div class="mx-auto mb-4 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Pembayaran Gagal</h3>
+                <p id="paymentErrorMessage" class="text-gray-600 mt-2">Terjadi kesalahan saat memproses pembayaran.</p>
+                <button id="retryPayment" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg mr-2">Coba Lagi</button>
+                <button id="closePaymentError" class="mt-4 bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Tutup</button>
             </div>
         </div>
     </div>
@@ -160,6 +203,7 @@
             let searchQuery = '';
             let allTransactions = [];
             let filteredTransactions = [];
+            let currentTransaction = null;
             
             // DOM Elements
             const transactionContainer = document.getElementById('transactionContainer');
@@ -173,10 +217,25 @@
             const searchInput = document.getElementById('searchInput');
             const searchButton = document.getElementById('searchButton');
             const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            // Detail Modal Elements
             const detailModal = document.getElementById('detailModal');
             const closeModal = document.getElementById('closeModal');
             const closeModalButton = document.getElementById('closeModalButton');
             const modalContent = document.getElementById('modalContent');
+            const paymentButton = document.getElementById('paymentButton');
+            
+            // Payment Modal Elements
+            const paymentModal = document.getElementById('paymentModal');
+            const closePaymentModal = document.getElementById('closePaymentModal');
+            const paymentContent = document.getElementById('paymentContent');
+            const paymentProcessing = document.getElementById('paymentProcessing');
+            const paymentSuccess = document.getElementById('paymentSuccess');
+            const closePaymentSuccess = document.getElementById('closePaymentSuccess');
+            const paymentError = document.getElementById('paymentError');
+            const paymentErrorMessage = document.getElementById('paymentErrorMessage');
+            const retryPayment = document.getElementById('retryPayment');
+            const closePaymentError = document.getElementById('closePaymentError');
             
             // Fetch transactions from API
             async function fetchTransactions() {
@@ -189,6 +248,10 @@
                     if (!token) {
                         throw new Error('Anda harus login untuk melihat riwayat transaksi.');
                     }
+                    // Ambil userId dari token (payload JWT)
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const userId = payload.id;
+
                     const response = await fetch(API_URL, {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -200,7 +263,8 @@
                     }
 
                     const data = await response.json();
-                    allTransactions = data; // Store all transactions
+                    // Filter hanya transaksi milik user ini
+                    allTransactions = (Array.isArray(data) ? data : data.data || []).filter(trx => trx.UserId == userId);
                     processTransactions();
                 } catch (error) {
                     console.error('Error fetching transactions:', error);
@@ -408,6 +472,9 @@
                     modalContent.innerHTML = '<p class="text-red-600">Transaksi tidak ditemukan.</p>';
                     return;
                 }
+
+                // Set current transaction for payment
+                currentTransaction = transaction;
                 
                 const date = new Date(transaction.createdAt || new Date());
 
@@ -476,70 +543,157 @@
                     </div>
                 `;
                 
+                // Show payment button only for pending transactions
+                if (transaction.status.toLowerCase() === 'pending') {
+                    paymentButton.classList.remove('hidden');
+                } else {
+                    paymentButton.classList.add('hidden');
+                }
+                
                 detailModal.classList.remove('hidden');
             }
-            
-            // Format currency
-            function formatCurrency(amount) {
-                return new Intl.NumberFormat('id-ID').format(amount);
+
+            // Show Payment Modal
+            function showPaymentModal() {
+                if (!currentTransaction) return;
+
+                // Reset payment modal state
+                hidePaymentProcessing();
+                hidePaymentSuccess();
+                hidePaymentError();
+                
+                // Build payment form
+                paymentContent.innerHTML = `
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-2">Detail Pesanan</h4>
+                        <div class="bg-light p-4 rounded-lg">
+                            <p><span class="text-gray-600">ID Transaksi:</span> TRX-${currentTransaction.id}</p>
+                            <p><span class="text-gray-600">Total Pembayaran:</span> Rp ${formatCurrency(currentTransaction.totalPrice || 0)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-2">Metode Pembayaran</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border rounded-lg bg-white">
+                                <input type="radio" name="paymentMethod" value="bank_transfer" checked class="h-4 w-4 text-primary">
+                                <span class="ml-2">Transfer Bank</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg bg-white">
+                                <input type="radio" name="paymentMethod" value="e_wallet" class="h-4 w-4 text-primary">
+                                <span class="ml-2">E-Wallet</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg bg-white">
+                                <input type="radio" name="paymentMethod" value="credit_card" class="h-4 w-4 text-primary">
+                                <span class="ml-2">Kartu Kredit</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button id="cancelPayment" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg mr-2">Batal</button>
+                        <button id="confirmPayment" class="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg">Bayar Sekarang</button>
+                    </div>
+                `;
+
+                paymentModal.classList.remove('hidden');
+
+                // Event listeners for payment modal buttons
+                document.getElementById('cancelPayment').onclick = () => paymentModal.classList.add('hidden');
+                document.getElementById('confirmPayment').onclick = handlePayment;
             }
-            
-            // Show loading indicator
-            function showLoading(show) {
-                if (show) {
-                    loadingIndicator.classList.remove('hidden');
-                } else {
-                    loadingIndicator.classList.add('hidden');
-                }
+
+            // Payment processing logic
+            async function handlePayment() {
+                hidePaymentError();
+                hidePaymentSuccess();
+                showPaymentProcessing();
+
+                // Simulasi proses pembayaran (ganti dengan API call jika ada endpoint pembayaran)
+                setTimeout(async () => {
+                    try {
+                        // Simulasi update status order menjadi completed
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${API_URL}/${currentTransaction.id}/status`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ status: 'completed' })
+                        });
+                        if (!response.ok) {
+                            throw new Error('Gagal memperbarui status transaksi.');
+                        }
+                        showPaymentSuccess();
+                        // Refresh data setelah pembayaran berhasil
+                        await fetchTransactions();
+                    } catch (err) {
+                        showPaymentError(err.message);
+                    }
+                }, 2000);
             }
-            
-            // Show error message
-            function showError(message) {
-                errorText.textContent = message;
-                errorMessage.classList.remove('hidden');
+
+            function showPaymentProcessing() {
+                paymentProcessing.classList.remove('hidden');
+                paymentContent.classList.add('hidden');
             }
-            
-            // Hide error message
-            function hideError() {
-                errorMessage.classList.add('hidden');
+            function hidePaymentProcessing() {
+                paymentProcessing.classList.add('hidden');
+                paymentContent.classList.remove('hidden');
             }
-            
-            // Show no results message
-            function showNoResults() {
-                noResultsMessage.classList.remove('hidden');
+            function showPaymentSuccess() {
+                paymentProcessing.classList.add('hidden');
+                paymentError.classList.add('hidden');
+                paymentSuccess.classList.remove('hidden');
             }
-            
-            // Hide no results message
-            function hideNoResults() {
-                noResultsMessage.classList.add('hidden');
+            function hidePaymentSuccess() {
+                paymentSuccess.classList.add('hidden');
             }
-            
-            // Event Listeners
-            // Previous page button
-            prevPageBtn.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
+            function showPaymentError(msg) {
+                paymentProcessing.classList.add('hidden');
+                paymentError.classList.remove('hidden');
+                paymentErrorMessage.textContent = msg || 'Terjadi kesalahan saat memproses pembayaran.';
+            }
+            function hidePaymentError() {
+                paymentError.classList.add('hidden');
+            }
+
+            // Payment modal event listeners
+            closePaymentModal.onclick = () => paymentModal.classList.add('hidden');
+            closePaymentSuccess.onclick = () => {
+                paymentModal.classList.add('hidden');
+                detailModal.classList.add('hidden');
+            };
+            retryPayment.onclick = () => {
+                hidePaymentError();
+                showPaymentModal();
+            };
+            closePaymentError.onclick = () => paymentModal.classList.add('hidden');
+
+            // Payment button in detail modal
+            paymentButton.onclick = showPaymentModal;
+
+            // Fetch initial transactions
+            fetchTransactions();
+
+            // Event listeners for filter buttons
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    currentFilter = button.id.replace('filter', '').toLowerCase();
+                    currentPage = 1;
                     processTransactions();
-                }
+                });
             });
-            
-            // Next page button
-            nextPageBtn.addEventListener('click', () => {
-                const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    processTransactions();
-                }
-            });
-            
-            // Search button
+
+            // Event listener for search button
             searchButton.addEventListener('click', () => {
                 searchQuery = searchInput.value;
                 currentPage = 1;
                 processTransactions();
             });
-            
-            // Enter key for search
+
+            // Event listener for search input (Enter key)
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     searchQuery = searchInput.value;
@@ -547,52 +701,68 @@
                     processTransactions();
                 }
             });
-            
-            // Filter buttons
-            filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Update active button
-                    filterButtons.forEach(btn => {
-                        btn.classList.remove('bg-primary', 'text-white');
-                        btn.classList.add('bg-white', 'text-primary');
-                    });
-                    button.classList.remove('bg-white', 'text-primary');
-                    button.classList.add('bg-primary', 'text-white');
-                    
-                    // Set filter based on button id
-                    const filterId = button.id.replace('filter', '');
-                    currentFilter = filterId === 'All' ? 'all' : filterId;
-                    currentPage = 1;
+
+            // Event listener for pagination buttons
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
                     processTransactions();
-                });
+                }
             });
-            
-            // Transaction detail view
+            nextPageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    processTransactions();
+                }
+            });
+
+            // Event listener for transaction detail buttons
             transactionContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('view-detail')) {
                     const transactionId = e.target.getAttribute('data-id');
                     showTransactionDetail(transactionId);
                 }
             });
-            
-            // Close modal handlers
+
+            // Event listener for closing detail modal
             closeModal.addEventListener('click', () => {
                 detailModal.classList.add('hidden');
             });
-            
             closeModalButton.addEventListener('click', () => {
                 detailModal.classList.add('hidden');
             });
-            
-            // Close modal when clicking outside
-            detailModal.addEventListener('click', (e) => {
-                if (e.target === detailModal) {
-                    detailModal.classList.add('hidden');
-                }
-            });
-            
-            // Initialize application
-            fetchTransactions();
+
+            // Show loading indicator
+            function showLoading(show) {
+                loadingIndicator.classList.toggle('hidden', !show);
+            }
+
+            // Show error message
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+            }
+
+            // Hide error message
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+
+            // Show no results message
+            function showNoResults() {
+                noResultsMessage.classList.remove('hidden');
+            }
+
+            // Hide no results message
+            function hideNoResults() {
+                noResultsMessage.classList.add('hidden');
+            }
+
+            // Format currency
+            function formatCurrency(amount) {
+                return amount.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            }
         });
     </script>
 </body>
