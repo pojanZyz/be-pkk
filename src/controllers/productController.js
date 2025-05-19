@@ -117,11 +117,13 @@ const updateProduct = async (req, res) => {
       return res.status(404).json({ message: 'Update product failed, product not found' });
     }
 
-    let imageUrl = product.imageUrl;
+    // Perbaikan: gunakan field 'image' (bukan 'imageUrl') agar konsisten dengan model dan frontend
+    let image = product.image;
 
     if (req.file) {
-      if (product.imageUrl) {
-        const imagePath = product.imageUrl.split('/uploads/')[1];
+      // Hapus gambar lama jika ada
+      if (product.image) {
+        const imagePath = product.image.split('/uploads/')[1];
         await supabase.storage.from('uploads').remove([`products/${imagePath}`]);
       }
 
@@ -139,7 +141,7 @@ const updateProduct = async (req, res) => {
         throw error;
       }
 
-      imageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/uploads/products/${encodeURIComponent(timestampedFileName)}`;
+      image = `${process.env.SUPABASE_URL}/storage/v1/object/public/uploads/products/${encodeURIComponent(timestampedFileName)}`;
     }
 
     await product.update({
@@ -147,7 +149,7 @@ const updateProduct = async (req, res) => {
       price,
       description,
       stock,
-      imageUrl,
+      image, // gunakan field 'image'
       CategoryId: categoryId,
     });
 
