@@ -208,7 +208,7 @@
     .bestseller-card .card-text {
       font-size: 0.8rem;
       text-align: center;
-      color: var(--dark-taupe);
+      color: var (--dark-taupe);
     }
     
     .bestseller-card .btn {
@@ -346,6 +346,10 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Sport</a>
+          </li>
+          <!-- Dashboard nav link -->
+          <li class="nav-item" id="dashboardNav" style="display:none">
+            <a class="nav-link" href="/frontend/dashboard/index.html">Dashboard</a>
           </li>
           <li class="nav-item">
             <button id="authButton" class="btn btn-outline-light shadow">Sign In</button>
@@ -500,10 +504,30 @@
     }
 
     // Check login status and update UI
-    function checkLoginStatus() {
+    async function checkLoginStatus() {
       const token = localStorage.getItem('token');
       const authButton = document.getElementById('authButton');
-      
+      const dashboardNav = document.getElementById('dashboardNav');
+      let isAdmin = false;
+
+      if (token) {
+        try {
+          // Fetch user info from /api/me
+          const res = await fetch('https://be-pkk-production.up.railway.app/api/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            // Cek jika username === 'admin'
+            if (data && data.username === 'admin') {
+              isAdmin = true;
+            }
+          }
+        } catch {}
+      }
+
       if (token) {
         // User is logged in
         authButton.innerHTML = '<i class="bi bi-box-arrow-right"></i>';
@@ -519,15 +543,22 @@
             checkLoginStatus();
           });
         };
+        // Show dashboard nav only for admin
+        if (isAdmin) {
+          dashboardNav.style.display = '';
+        } else {
+          dashboardNav.style.display = 'none';
+        }
       } else {
         // User is not logged in
         authButton.textContent = 'Sign In';
         authButton.onclick = function() {
           window.location.href = '/frontend/login.html';
         };
+        dashboardNav.style.display = 'none';
       }
-        updateCartCount();
-        updateHistoryCount();
+      updateCartCount();
+      updateHistoryCount();
     }
 
     // Update cart count
