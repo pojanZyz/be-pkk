@@ -571,26 +571,16 @@
                     formData.append('categoryId', parseInt(selectedCategory));
                 }
 
-                // If update and no new image is selected, use previous image
+                // If update and no new image is selected, DO NOT append previous image URL.
+                // Leave 'image' out of FormData so backend keeps existing image.
+                // Only append when a real file is selected (handled automatically by FormData).
                 if (isEdit) {
                     const imageInput = document.getElementById('product-image');
-                    if (!imageInput.files || imageInput.files.length === 0) {
-                        // Find the product from products array or fetch from API
-                        let prevProduct = products.find(p => p.id == productId);
-                        if (!prevProduct) {
-                            // Fetch from API if not found locally
-                            const resp = await fetch(`${API_BASE_URL}/${productId}`);
-                            if (resp.ok) {
-                                const data = await resp.json();
-                                prevProduct = data.data;
-                            }
-                        }
-                        if (prevProduct && prevProduct.image) {
-                            formData.append('image', prevProduct.image);
-                        }
+                    if (imageInput.files && imageInput.files.length > 0) {
+                        // file will be appended automatically by FormData since input has name="image"
                     }
                 }
-
+ 
                 const headers = {
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 };

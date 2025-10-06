@@ -46,7 +46,7 @@
     .register-image {
       width: 50%;
       background-color: var(--pale-taupe);
-      background-image: url('/frontend/img/bg_register.jpg');
+      background-image: url('./img/bg_register.jpg');
       background-size: cover;
       background-position: center;
       position: relative;
@@ -285,7 +285,7 @@
             confirmButtonColor: '#A59D84'
           }).then(() => {
             // Redirect to login page
-            window.location.href = '/frontend/login.html';
+            window.location.href = './login.html';
           });
         } else {
           Swal.fire({

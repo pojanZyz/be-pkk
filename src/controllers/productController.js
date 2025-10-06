@@ -20,8 +20,12 @@ const uploadImageToSupabase = async (file) => {
 
 // Helper function to delete image from Supabase
 const deleteImageFromSupabase = async (imageUrl) => {
+  if (!imageUrl) return;
   const imagePath = imageUrl.split('/uploads/')[1];
-  await supabase.storage.from('uploads').remove([`products/${imagePath}`]);
+  if (!imagePath) return;
+  // Ensure we don't duplicate the `products/` segment
+  const normalizedPath = imagePath.startsWith('products/') ? imagePath : `products/${imagePath}`;
+  await supabase.storage.from('uploads').remove([normalizedPath]);
 };
  
 // Get all products
@@ -144,13 +148,24 @@ const updateProduct = async (req, res) => {
       image = `${process.env.SUPABASE_URL}/storage/v1/object/public/uploads/products/${encodeURIComponent(timestampedFileName)}`;
     }
 
+    // If no new file uploaded, frontend may send the existing image URL as a string field `image` in FormData.
+    // Accept that and use it to keep the image unchanged (or explicitly set it).
+    if (!req.file && req.body && req.body.image) {
+      // req.body values from multipart/form-data are strings. Accept plain URL or array-like string.
+      if (typeof req.body.image === 'string' && req.body.image.startsWith('http')) {
+        image = req.body.image;
+      } else if (Array.isArray(req.body.image) && req.body.image.length > 0) {
+        image = req.body.image[0];
+      }
+    }
+
     await product.update({
       name,
       price,
       description,
       stock,
       image, // gunakan field 'image'
-      CategoryId: categoryId,
+      CategoryId: categoryId ? parseInt(categoryId) : product.CategoryId,
     });
 
     res.status(200).json({ message: 'Product updated successfully', data: product });

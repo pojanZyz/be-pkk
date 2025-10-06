@@ -349,19 +349,31 @@
           </li>
           <!-- Dashboard nav link -->
           <li class="nav-item" id="dashboardNav" style="display:none">
+<<<<<<< HEAD
             <a class="nav-link" href="/frontend/dashboard/index.html">Dashboard</a>
+=======
+            <a class="nav-link" href="./dashboard/index.html">Dashboard</a>
+>>>>>>> 96bcd3d (fix)
           </li>
           <li class="nav-item">
             <button id="authButton" class="btn btn-outline-light shadow">Sign In</button>
           </li>
           <li class="nav-item">
+<<<<<<< HEAD
             <a href="/frontend/cart.html" class="btn btn-outline-light shadow cart-btn">
+=======
+            <a href="./cart.html" class="btn btn-outline-light shadow cart-btn">
+>>>>>>> 96bcd3d (fix)
               <i class="bi bi-cart"></i>
               <span class="cart-count" id="cartCount">0</span>
             </a>
           </li>
           <li class="nav-item">
+<<<<<<< HEAD
             <a href="/frontend/history.html" class="btn btn-outline-light shadow cart-btn">
+=======
+            <a href="./history.html" class="btn btn-outline-light shadow cart-btn">
+>>>>>>> 96bcd3d (fix)
               <i class="bi bi-clock-history"></i>
               <span class="history-count" id="historyCount">0</span>
             </a>
@@ -553,7 +565,7 @@
         // User is not logged in
         authButton.textContent = 'Sign In';
         authButton.onclick = function() {
-          window.location.href = '/frontend/login.html';
+          window.location.href = './login.html';
         };
         dashboardNav.style.display = 'none';
       }
@@ -665,7 +677,7 @@
             cancelButtonText: 'Later'
           }).then((result) => {
             if (result.isConfirmed) {
-              window.location.href = '/frontend/login.html';
+              window.location.href = './login.html';
             }
           });
           return false;

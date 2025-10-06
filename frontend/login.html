@@ -47,7 +47,7 @@
     .login-image {
       width: 50%;
       background-color: var(--pale-taupe);
-      background-image: url('/frontend/img/bg_login.jpg');
+      background-image: url('./img/bg_login.jpg');
       background-size: cover;
       background-position: center -10rem;
       position: relative;
@@ -242,9 +242,9 @@
             if (result.token) {
               const payload = JSON.parse(atob(result.token.split('.')[1]));
               if (payload.role === 'admin') {
-                window.location.href = '/frontend/dashboard/index.html';
+                window.location.href = './dashboard/index.html';
               } else {
-                window.location.href = '/frontend/index.html';
+                window.location.href = './index.html';
               }
             }
           });
