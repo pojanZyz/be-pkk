@@ -183,8 +183,8 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: 'Delete product failed, product not found' });
     }
 
-    if (product.imageUrl) {
-      await deleteImageFromSupabase(product.imageUrl);
+    if (product.image) {
+      await deleteImageFromSupabase(product.image);
     }
 
     await product.destroy();
