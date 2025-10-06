@@ -2,7 +2,12 @@ import { Product, Category } from '../models/index.js';
 import { db } from '../config/database.js';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+// Prefer service role key on server to avoid RLS restrictions when performing storage operations.
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+if (!supabaseKey) {
+  console.warn('No SUPABASE key found in environment. Storage operations may fail.');
+}
+const supabase = createClient(process.env.SUPABASE_URL, supabaseKey);
 
 // Helper function to upload image to Supabase
 const uploadImageToSupabase = async (file) => {
@@ -75,16 +80,22 @@ const createProduct = async (req, res) => {
     if (req.file) {
       const timestampedFileName = `${Date.now()}_${req.file.originalname}`;
 
-      const { data, error } = await supabase.storage
-        .from('uploads')
-        .upload(`products/${timestampedFileName}`, req.file.buffer, {
-          contentType: req.file.mimetype,
-          cacheControl: '3600',
-          upsert: false,
-        });
-
+      let uploadResult;
+      try {
+        uploadResult = await supabase.storage
+          .from('uploads')
+          .upload(`products/${timestampedFileName}`, req.file.buffer, {
+            contentType: req.file.mimetype,
+            cacheControl: '3600',
+            upsert: false,
+          });
+      } catch (err) {
+        console.error('Supabase upload threw error (exception):', err);
+        throw err;
+      }
+      const { data, error } = uploadResult;
       if (error) {
-        console.error('Supabase upload error:', error);
+        console.error('Supabase upload returned error:', error);
         throw error;
       }
 
@@ -132,16 +143,22 @@ const updateProduct = async (req, res) => {
       }
 
       const timestampedFileName = `${Date.now()}_${req.file.originalname}`;
-      const { data, error } = await supabase.storage
-        .from('uploads')
-        .upload(`products/${timestampedFileName}`, req.file.buffer, {
-          contentType: req.file.mimetype,
-          cacheControl: '3600',
-          upsert: false,
-        });
-
+      let uploadResult;
+      try {
+        uploadResult = await supabase.storage
+          .from('uploads')
+          .upload(`products/${timestampedFileName}`, req.file.buffer, {
+            contentType: req.file.mimetype,
+            cacheControl: '3600',
+            upsert: false,
+          });
+      } catch (err) {
+        console.error('Supabase upload (update) threw error (exception):', err);
+        throw err;
+      }
+      const { data, error } = uploadResult;
       if (error) {
-        console.error('Supabase upload error:', error);
+        console.error('Supabase upload (update) returned error:', error);
         throw error;
       }
 
